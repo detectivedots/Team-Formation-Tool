@@ -37,6 +37,7 @@ class CSVHandler:
         df1["TeamID"] = self.df.index
         df1["Attended"] = False
         df1["Practice"] = False
+        df1["Seat"] = 0
         df1["Rank"] = 0
 
         df2 = self.df[self.df['Has teammate']][["Member 2 name", "Member 2 handle"]].copy()
@@ -44,7 +45,13 @@ class CSVHandler:
         df2["TeamID"] = self.df[self.df['Has teammate']].index
         df2["Attended"] = False
         df2["Practice"] = False
+        df2["Seat"] = 0
         df2["Rank"] = 0
 
         save_df = pd.concat([df1, df2], ignore_index=True)
+        save_df = save_df.drop_duplicates(subset=["Handle"])
         save_df.to_csv(path, index=False)
+
+    def get_initial_teams(self):
+        return list(zip(self.df[self.df["Has teammate"]]["Member 1 handle"],
+                        self.df[self.df["Has teammate"]]["Member 2 handle"]))

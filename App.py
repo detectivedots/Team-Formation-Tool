@@ -57,8 +57,11 @@ class App(tk.Tk):
         match_by_handle_btn = tk.Button(action_frame, text="Match by Handle", command=self.match_by_handle)
         match_by_handle_btn.grid(row=0, column=4, padx=5)
 
+        match_by_team_index = tk.Button(action_frame, text="Match by Team Number", command=self.match_by_team_id)
+        match_by_team_index.grid(row=0, column=5, padx=5)
+
         finalize_btn = tk.Button(action_frame, text="Finalize Teams (Export CSV)", command=self.finalize_teams)
-        finalize_btn.grid(row=0, column=5, padx=5)
+        finalize_btn.grid(row=0, column=6, padx=5)
 
         self.team_matching = None
         self.suggested_indices = None
@@ -153,7 +156,9 @@ class App(tk.Tk):
         if not teams:
             messagebox.showwarning("No Contestants", "No valid contestants found in the CSV.")
             return
-        self.team_matching = TeamMatching(teams)
+        handles = list(contest_df["Handle"])
+        self.team_matching = TeamMatching(teams, handles)
+        self.team_matching.match_handle_pairs(self.csv_handler.get_initial_teams())
         self.refresh_team_display()
 
     def refresh_team_display(self):
@@ -254,6 +259,16 @@ class App(tk.Tk):
             return
         handles = [h.strip() for h in handles_str.split(",") if h.strip()]
         self.team_matching.match_by_handle(handles)
+        self.refresh_team_display()
+
+    def match_by_team_id(self):
+        if not self.team_matching:
+            return
+        id_str = simpledialog.askstring("Match by IDs", "Enter IDs (comma separated):")
+        if not id_str:
+            return
+        ids = list(map(int, id_str.strip().split(',')))
+        self.team_matching.match_by_index(ids)
         self.refresh_team_display()
 
     def finalize_teams(self):

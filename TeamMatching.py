@@ -37,9 +37,10 @@ class Team:
 
 
 class TeamMatching:
-    def __init__(self, teams: list[Team]):
+    def __init__(self, teams: list[Team], handles):
         self.teams = sorted(teams)
         self.skipped = []  # (team_index, contestant) pairs skipped
+        self.handles = set(handles)
 
     def suggest_team(self):
         if len(self.teams) < 2 or len(self.teams[0]) == 3 or len(self.teams[1]) == 3:
@@ -103,3 +104,16 @@ class TeamMatching:
         if len(team) == 0:
             self.teams.pop(team_index)
         self.teams = sorted(self.teams)
+
+    def match_handle_pairs(self, pairs):
+        matched = set()
+        for pair in pairs:
+            if pair[0] == pair[1]:
+                continue
+            if pair[0] > pair[1]:
+                pair = (pair[1], pair[0])
+            if pair in matched:
+                continue
+            matched.add(pair)
+            if pair[0] in self.handles and pair[1] in self.handles:
+                self.match_by_handle(pair)
